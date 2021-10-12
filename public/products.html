@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product page</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./kafene.js"></script>
+    <script>
+        $(document).ready(function () {
+            if (typeof localStorage !== "undefined") {
+                const status = localStorage.getItem("LOGIN_STATUS");
+                if (status === "LOGGED_IN") {
+                    function renderTable(products) {
+                        let tbody = "";
+                        for(let i = 0; i < products.length; i++) {
+                            tbody = tbody + `<tr class="productpage-tablerow">
+                                <td class="productpage-secondarytext">${products[i].id}</td>
+                                <td class="productpage-primarytext">${products[i].medicineName}</td>
+                                <td class="productpage-secondarytext">${products[i].medicineBrand}</td>
+                                <td class="productpage-primarytext">${moment(products[i].expiryDate, "DD-MMM-YYYY").format("DD MMM, YYYY")}</td>
+                                <td class="productpage-secondarytext">${products[i].unitPrice}</td>
+                                <td class="productpage-secondarytext">${products[i].stock}</td>      
+                            </tr>`;
+                        }
+                        $("#count").text(`Count: ${products.length}`);
+                        $("#table-body").html(tbody);
+                    }
+                    fetch("https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/products")
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(products) {
+                        let displayedProducts = products;
+                        renderTable(products);
+                        $("#filter-expired").change(function(event) {
+                            if (event.target.checked) {
+                                const expiredProducts = products.filter((product) => new Date(product.expiryDate).getTime() < new Date().getTime());
+                                displayedProducts = [...expiredProducts, ...displayedProducts];
+                            } else {
+                                displayedProducts = displayedProducts.filter((product) => new Date(product.expiryDate).getTime() >= new Date().getTime());
+                            }
+                            renderTable(displayedProducts);
+                        });
+                        $("#filter-lowstock").change(function(event) {
+                            if (event.target.checked) {
+                                const lowStockProducts = products.filter((product) => product.stock < 100);
+                                displayedProducts = [ ...lowStockProducts, ...displayedProducts];
+                            } else {
+                                displayedProducts = displayedProducts.filter((product) => product.stock >= 100);
+                            }
+                            renderTable(displayedProducts);
+                        });
+                        $("#logout").click(function(event) {
+                            event.preventDefault();
+                            logout();
+                        });
+                    });
+                } else {
+                    window.location.pathname = "/login.html";
+                }
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="./kafene.css">
+</head>
+<body>
+     <!-- Top bar -->
+     <header>
+        <div id="topbar">
+            <div id="topbar-left-menu">
+                <div id="topbar-logo-wrapper">
+                    <img src="https://edu-web-fundamentals.web.app/static/media/logo.58169365.png" alt="kafene-logo">
+                    <p id="topbar-brandname">Kafene</p>
+                </div>
+                <nav id="topbar-menu-items-nav">
+                    <a class="topbar-menu-items" href="./orders.html">Orders</a>
+                    <a class="topbar-menu-items active" href="./products.html">Products</a>
+                    <a class="topbar-menu-items" href="./user.html">Users</a>
+                </nav>
+            </div>
+            <a id="logout" class="topbar-menu-items">Logout</a>
+        </div>   
+    </header>
+    <!-- Topbar End -->
+    <main id="app-main-container">
+        <div id="productpage-wrapper">
+            <h1 id="productpage-main-heading">Products</h1>
+            <div id="productpage-products-wrapper">
+                <div id="productpage-filter-wrapper">
+                    <h3>Filters</h3>
+                    <div id="productpage-filteroptions">
+                        <p id="count">Count: </p>
+                        <label class="productpage-filtercheckbox">
+                            <input id="filter-expired" type="checkbox" name="products-expired" checked="">Expired
+                        </label>
+                        <label class="productpage-filtercheckbox">
+                            <input id="filter-lowstock" type="checkbox" name="products-lowstock" checked="">Low Stock
+                        </label>
+                    </div>
+                </div>
+                <div id="productpage-products-table-wrapper">
+                    <table id="productpage-products-table">
+                        <tr id="productpage-table-subjectrow">
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>Product Brand</th>
+                            <th>Expiry Date</th>
+                            <th>Unit Price</th>
+                            <th>Stock Price</th>
+                        </tr>
+                        <tbody id="table-body">    
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

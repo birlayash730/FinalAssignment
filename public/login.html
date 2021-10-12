@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=SS, initial-scale=1.0">
+    <title>Kafene</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function() {
+            if (typeof localStorage !== "undefined") {
+                let status = localStorage.getItem("LOGIN_STATUS");
+                if (status === "LOGGED_IN") {
+                    window.location.pathname = "/orders.html";
+                }
+            }
+            let username = "";
+            let password = "";
+            function submit() {
+                if (username && password) {
+                    if (username === password) {
+                        alert("Login successfull");
+                        if(typeof localStorage !== "undefined") {
+                            localStorage.setItem("LOGIN_STATUS", "LOGGED_IN");
+                        }
+                        window.location.assign("/orders.html");
+                    } else {
+                        alert("Please enter valid credentials");
+                        $("#username").val("");
+                        $("#password").val("");
+                    }
+                } else if (username) {
+                    alert("Password is required")
+                } else if (password) {
+                    alert("Username is required");
+                } else {
+                    alert("Please enter username and password");
+                }
+            }
+            $("#username").change(function(event) {
+                username = event.target.value;
+            });
+            $("#password").change(function() {
+                password = event.target.value;
+            });
+            $("#loginpage_button").click(function(event) {
+                event.preventDefault();
+                submit();
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="./kafene.css">
+</head>
+<body>
+    <!-- Top bar -->
+    <header>
+        <div id="topbar">
+            <div id="topbar-left-menu">
+                <div id="topbar-logo-wrapper">
+                    <img src="https://edu-web-fundamentals.web.app/static/media/logo.58169365.png" alt="kafene-logo">
+                    <p id="topbar-brandname">Kafene</p>
+                </div>
+                <nav id="topbar-menu-items-nav">
+                    <a class="topbar-menu-items" href="#">Orders</a>
+                    <a class="topbar-menu-items" href="#">Products</a>
+                    <a class="topbar-menu-items" href="#">Users</a>
+                </nav>
+            </div>
+        </div>   
+    </header>
+    <!-- Topbar End -->
+    <main id="app-main-container">
+        <div>
+            <form id="loginpage-form" method="POST">
+                <h1>Sign In</h1>
+                <input id="username" class="loginpage-inputfield" type="text" name="username" placeholder="Enter Username">
+                <input id="password" class="loginpage-inputfield" type="password" name="password" placeholder="Enter Password">
+                <input id="loginpage_button" type="submit" value="Login">
+            </form>
+        </div>
+    </main>
+
+
+</body>
+</html>

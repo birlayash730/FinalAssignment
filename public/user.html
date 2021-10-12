@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Page</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./kafene.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (typeof localStorage !== "undefined") {
+                const status = localStorage.getItem("LOGIN_STATUS");
+                if (status === "LOGGED_IN") {
+                    let searchText = "";
+                    function renderTable(users) {
+                        let tbody = "";
+                        for(let i = 0; i < users.length; i++) {
+                            tbody = tbody + `<tr class="userpage-users-table-row ">
+                                <td class="userpage-scondarytext">${users[i].id}</td>
+                                <td class="userpage-primarytext"><img src="${users[i].profilePic}" alt="Profile Pic"></td>
+                                <td class="userpage-scondarytext">${users[i].fullName}</td><td class="UserList_PrimaryText__38Hc_">${moment(users[i].dob, "DD-MMM-YYYY").format("DD MMM, YYYY")}</td>
+                                <td class="userpage-scondarytext">${users[i].gender}</td>
+                                <td class="userpage-scondarytext">${users[i].currentCity}, ${users[i].currentCountry}</td>
+                            </tr>`;
+                        }
+                        $("#table-body").html(tbody);
+                    }
+                    function getUsers(fullName) {
+                        fetch(`https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/users${fullName ? "?fullName="+fullName : ""}`)
+                        .then(function(res) {
+                            return res.json();
+                        })
+                        .then((users) => {
+                            renderTable(users);
+                        });
+                    }
+                    getUsers();
+                    $("#userpage-reset-button").click(function(event) {
+                        searchText = "";
+                        getUsers();
+                    });
+                    $("#userspage-searchbox").change(function(event) {
+                        searchText = event.target.value;
+                    });
+                    $(document).submit(function(event) {
+                        if (searchText.length < 2) {
+                            alert("Please enter atleast 2 characters");
+                            return false;
+                        }
+                        event.preventDefault();
+                        getUsers(searchText);
+                    });
+                    $("#logout").click(function(event) {
+                        event.preventDefault();
+                        logout();
+                    });
+                } else {
+                    window.location.pathname = "/Users/rajatkhare/Downloads/AssignmentFinalExam/login.html";
+                }
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="./kafene.css">
+</head>
+<body>
+     <!-- Top bar -->
+     <header>
+        <div id="topbar">
+            <div id="topbar-left-menu">
+                <div id="topbar-logo-wrapper">
+                    <img src="https://edu-web-fundamentals.web.app/static/media/logo.58169365.png" alt="kafene-logo">
+                    <p id="topbar-brandname">Kafene</p>
+                </div>
+                <nav id="topbar-menu-items-nav">
+                    <a class="topbar-menu-items" href="./orders.html">Orders</a>
+                    <a class="topbar-menu-items" href="./products.html">Products</a>
+                    <a class="topbar-menu-items active" href="./user.html">Users</a>
+                </nav>
+            </div>
+            <a id="logout" class="topbar-menu-items">Logout</a>
+        </div>   
+    </header>
+    <!-- Topbar End -->
+    <main id="app-main-container">
+        <div id="userpage-wrapper">
+            <h1 id="userpage-main-heading">Users</h1>
+            <div id="userpage-userswrapper">
+                <form id="userpage-searchbox-button-wrapper" method="POST">
+                    <input id="userspage-searchbox" type="text" placeholder="Search by Name"/>
+                    <input type="reset" id="userpage-reset-button" value="Reset"/>
+                </form>
+                <div id="userpage-users-table-wrapper">
+                    <table id="userpage-users-table">
+                        <tr id="userpage-table-subject-row">
+                            <th>ID</th>
+                            <th>User Avatar</th>
+                            <th>Full Name</th>
+                            <th style="min-width: 100px;">DoB</th>
+                            <th>Gender</th>
+                            <th>Current Location</th>
+                        </tr>
+                        <tbody id="table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>                                    
+        </div>
+    </main>        
+</body>
+</html>

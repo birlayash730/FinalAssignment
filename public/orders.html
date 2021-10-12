@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="./kafene.js"></script>
+    <script>
+        $(document).ready(function () {
+            if (typeof localStorage !== "undefined") {
+                const status = localStorage.getItem("LOGIN_STATUS");
+                if (status === "LOGGED_IN") {
+                    function renderTable(orders) {
+                        let tbody = "";
+                        for(let i = 0; i < orders.length; i++) {
+                            tbody = tbody + `<tr class="homepage-tablerow">
+                                        <td class="homepage-scondarytext">${orders[i].id}</td>
+                                        <td class="homepage-primarytext">${orders[i].customerName}</td>
+                                        <td class="homepage-primarytext">${moment(orders[i].orderDate, "DD-MMM-YYYY").format("DD MMM, YYYY")} <br><span class="Homepage_SecondaryText__1or5Q">${orders[i].orderTime}</span></td>
+                                        <td class="homepage-scondarytext">${orders[i].amount}</td>
+                                        <td class="homepage-primarytext">${orders[i].orderStatus}</td>
+                                    </tr>`;
+                        }
+                        $("#count").text(`Count: ${orders.length}`);
+                        $("#table-body").html(tbody);
+                    }
+                    fetch("https://5fc1a1c9cb4d020016fe6b07.mockapi.io/api/v1/orders")
+                    .then(function(res) {
+                        return res.json();
+                    })
+                    .then(function(orders) {
+                        let displayedOrders = orders;
+                        renderTable(orders);
+                        $("#filter-new").change(function(event) {
+                            if (event.target.checked) {
+                                const newOrders = orders.filter((order) => order.orderStatus === "New");
+                                displayedOrders = [...newOrders, ...displayedOrders];
+                            } else {
+                                displayedOrders = displayedOrders.filter((order) => order.orderStatus !== "New");
+                            }
+                            renderTable(displayedOrders);
+                        });
+                        $("#filter-packed").change(function(event) {
+                            if (event.target.checked) {
+                                const packedOrders = orders.filter((order) => order.orderStatus === "Packed");
+                                displayedOrders = [ ...packedOrders, ...displayedOrders];
+                            } else {
+                                displayedOrders = displayedOrders.filter((order) => order.orderStatus !== "Packed");
+                            }
+                            renderTable(displayedOrders);
+                        });
+                        $("#filter-transit").change(function(event) {
+                            if (event.target.checked) {
+                                const inTransitOrders = orders.filter((order) => order.orderStatus === "InTransit");
+                                displayedOrders = [ ...inTransitOrders, ...displayedOrders];
+                            } else {
+                                displayedOrders = displayedOrders.filter((order) => order.orderStatus !== "InTransit");
+                            }
+                            renderTable(displayedOrders);
+                        });
+                        $("#filter-delivered").change(function(event) {
+                            if (event.target.checked) {
+                                const deliveredOrders = orders.filter((order) => order.orderStatus === "Delivered");
+                                displayedOrders = [ ...deliveredOrders, ...displayedOrders];
+                            } else {
+                                displayedOrders = displayedOrders.filter((order) => order.orderStatus !== "Delivered");
+                            }
+                            renderTable(displayedOrders);
+                        });
+                        $("#logout").click(function(event) {
+                            event.preventDefault();
+                            logout();
+                        });
+                    });
+                } else {
+                    window.location.pathname = "/login.html";
+                }
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="./kafene.css">
+</head>
+<body>
+    <!-- Top bar -->
+    <header>
+        <div id="topbar">
+            <div id="topbar-left-menu">
+                <div id="topbar-logo-wrapper">
+                    <img src="https://edu-web-fundamentals.web.app/static/media/logo.58169365.png" alt="kafene-logo">
+                    <p id="topbar-brandname">Kafene</p>
+                </div>
+                <nav id="topbar-menu-items-nav">
+                    <a class="topbar-menu-items active" href="./orders.html">Orders</a>
+                    <a class="topbar-menu-items" href="./products.html">Products</a>
+                    <a class="topbar-menu-items" href="./user.html">Users</a>
+                </nav>
+            </div>
+            <a id="logout" class="topbar-menu-items">Logout</a>
+        </div>   
+    </header>
+    <!-- Topbar End -->
+    <!-- Main Start -->
+    <main id="app-main-container">
+        <div id="homepage-wrapper">
+            <h1 id="homepagepage-main-heading">Orders</h1>
+            <div id="homepage-orders-wrapper">
+                <div id="homepage-filter-wrapper">
+                    <h3>Filters</h3>
+                    <div id="homepage-filteroptions">
+                        <p id="count">Count: </p>
+                        <label class="homepage-filtercheckbox">
+                            <input id="filter-new" type="checkbox" name="orders-new" checked="">New
+                        </label>
+                        <label class="homepage-filtercheckbox">
+                            <input id="filter-packed" type="checkbox" name="orders-packed" checked="">Packed
+                        </label>
+                        <label class="homepage-filtercheckbox">
+                            <input id="filter-transit" type="checkbox" name="orders-transit" checked="">InTransit
+                        </label>
+                        <label class="homepage-filtercheckbox">
+                            <input id="filter-delivered" type="checkbox" name="orders-delivered" checked="">Delivered
+                        </label>
+                    </div>
+                </div>
+                <div id="homepage-order-table-wrapper">
+                    <table id="homepage-orders-table">
+                        <tr id="homepage-table-subject-row">
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                        <tbody id="table-body">         
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
